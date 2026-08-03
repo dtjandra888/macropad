@@ -1,6 +1,7 @@
 
 #include "oled.h"
 
+#include "font5x7.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 
@@ -36,6 +37,19 @@ static void oled_data(const uint8_t *data, size_t length) {
   spi_write_blocking(SPI_PORT, data, length);
 
   gpio_put(PIN_CS, 1);
+}
+
+static const struct Font *find_char(char c) {
+  int i = 0;
+
+  while (font[i].letter != 0) {
+    if (font[i].letter == c)
+      return &font[i];
+
+    i++;
+  }
+
+  return NULL;
 }
 
 void oled_update(void) {
@@ -141,5 +155,31 @@ void oled_draw_pixel(int x, int y, int color) {
     framebuffer[index] |= (1 << bit);
   } else {
     framebuffer[index] &= ~(1 << bit);
+  }
+}
+
+void oled_draw_char(int x, int y, char c) {
+  const struct Font *glyph = find_char(c);
+
+  if (glyph == NULL) {
+    return;
+  }
+  for (int r = 0; r < 7; r++) {
+    for (int c = 0; c < 5; c++) {
+      if (glyph->code[r][c] != '#') {
+        continue;
+      }
+      oled_draw_pixel(x + c, y + r, 1);
+    }
+  }
+}
+void oled_draw_string(int x, int y, const char *str) {
+  while (*str) {
+    oled_draw_char(x, y, *str);
+
+    // draw spacing between chars
+    x += 6;
+
+    str++;
   }
 }

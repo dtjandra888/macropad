@@ -32,10 +32,7 @@ int main() {
   printf("Program init\n");
   ws2812_program_init(pio, sm, offset, LED_PIN, 800000, false);
 
-  oled_draw_pixel(50, 30, 1);
-  oled_draw_pixel(100, 50, 1);
-  oled_draw_pixel(30, 50, 1);
-  oled_draw_pixel(40, 50, 1);
+  oled_draw_string(50, 50, "Hello World!");
   oled_update();
 
   while (true) {

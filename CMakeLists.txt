@@ -1,5 +1,5 @@
-
 cmake_minimum_required(VERSION 3.13)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(PICO_BOARD waveshare_rp2040_zero)
 
@@ -26,6 +26,7 @@ target_sources(${PROJECT_NAME}
         main.c
         ws2812.c
         oled.c
+        font5x7.c
 )
 
 target_include_directories(${PROJECT_NAME}
