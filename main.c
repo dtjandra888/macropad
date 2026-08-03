@@ -16,7 +16,9 @@ int main() {
   printf("Hello! from RP2040\n");
   printf("Initializing ws2812\n");
 
-  oled_init();
+  oled_init(false);
+  oled_clear();
+  oled_update();
   sleep_ms(5000);
 
   PIO pio = pio0;
@@ -30,14 +32,14 @@ int main() {
   printf("Program init\n");
   ws2812_program_init(pio, sm, offset, LED_PIN, 800000, false);
 
+  oled_draw_pixel(50, 30, 1);
+  oled_draw_pixel(100, 50, 1);
+  oled_draw_pixel(30, 50, 1);
+  oled_draw_pixel(40, 50, 1);
+  oled_update();
+
   while (true) {
     printf("Tick\n");
-
-    oled_fill(0xFF);
-    sleep_ms(5000);
-
-    oled_fill(0x00);
-
     sleep_ms(5000);
 
     put_pixel(pio, sm, urgb_u32(0xff, 0, 0));

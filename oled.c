@@ -18,6 +18,8 @@
 #define PIN_CS 13
 #define PIN_RST 14
 
+static uint8_t framebuffer[1024];
+
 static void oled_command(uint8_t cmd) {
   gpio_put(PIN_CS, 0);
   gpio_put(PIN_DC, 0);
@@ -36,7 +38,21 @@ static void oled_data(const uint8_t *data, size_t length) {
   gpio_put(PIN_CS, 1);
 }
 
-void oled_init(void) {
+void oled_update(void) {
+  // Column address
+  oled_command(0x21);
+  oled_command(0);
+  oled_command(127);
+
+  // Page address
+  oled_command(0x22);
+  oled_command(0);
+  oled_command(7);
+
+  oled_data(framebuffer, sizeof(framebuffer));
+}
+
+void oled_init(bool reset) {
   // Initialize SPI
   spi_init(SPI_PORT, 1000 * 1000); // 1 MHz
 
@@ -56,14 +72,16 @@ void oled_init(void) {
   gpio_put(PIN_CS, 1);
 
   // Hardware Reset
-  gpio_put(PIN_RST, 1);
-  sleep_ms(10);
+  if (reset) {
+    gpio_put(PIN_RST, 1);
+    sleep_ms(10);
 
-  gpio_put(PIN_RST, 0);
-  sleep_ms(10);
+    gpio_put(PIN_RST, 0);
+    sleep_ms(10);
 
-  gpio_put(PIN_RST, 1);
-  sleep_ms(100);
+    gpio_put(PIN_RST, 1);
+    sleep_ms(100);
+  }
 
   // SSD1315 initialization sequence
   oled_command(0xAE); // Display OFF
@@ -103,20 +121,25 @@ void oled_init(void) {
   oled_command(0xAF); // Display ON
 }
 
-void oled_fill(uint8_t value) {
-  uint8_t framebuffer[1024];
+void oled_clear(void) {
+  memset(framebuffer, 0, sizeof(framebuffer));
 
-  memset(framebuffer, value, sizeof(framebuffer));
+  oled_update();
+}
 
-  // Column address
-  oled_command(0x21);
-  oled_command(0);
-  oled_command(127);
+void oled_draw_pixel(int x, int y, int color) {
+  if (x < 0 || x >= 128)
+    return;
+  if (y < 0 || y >= 64)
+    return;
 
-  // Page address
-  oled_command(0x22);
-  oled_command(0);
-  oled_command(7);
+  int page = y / 8;
+  int bit = y % 8;
 
-  oled_data(framebuffer, sizeof(framebuffer));
+  int index = page * 128 + x;
+  if (color) {
+    framebuffer[index] |= (1 << bit);
+  } else {
+    framebuffer[index] &= ~(1 << bit);
+  }
 }
