@@ -173,6 +173,7 @@ void oled_draw_char(int x, int y, char c) {
     }
   }
 }
+
 void oled_draw_string(int x, int y, const char *str) {
   while (*str) {
     oled_draw_char(x, y, *str);

@@ -24,9 +24,10 @@ pico_generate_pio_header(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
     PRIVATE
         main.c
-        ws2812.c
-        oled.c
         font5x7.c
+        oled.c
+        ws2812.c
+        logger.c
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -40,6 +41,8 @@ target_link_libraries(${PROJECT_NAME}
         pico_stdlib
         hardware_pio
         hardware_spi
+        # tinyusb_device
+        # tunyusb_board
 )
 
 pico_add_extra_outputs(${PROJECT_NAME})
