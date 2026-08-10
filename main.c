@@ -22,13 +22,18 @@ int main() {
   log_info("Macropad starting");
 
   tusb_init();
-    
+
+  absolute_time_t next_scan = get_absolute_time();
 
   while (true) {
     tud_task();
-    key_scan();
 
-    sleep_ms(1);
+    if (absolute_time_diff_us(get_absolute_time(), next_scan) <= 0) {
+      next_scan = delayed_by_us(next_scan, 1000);
+      key_scan();
+
+      send_hid_report();
+    }
   }
 }
 
