@@ -25,9 +25,12 @@ target_sources(${PROJECT_NAME}
     PRIVATE
         main.c
         font5x7.c
+        key.c
+        hid.c
         oled.c
-        ws2812.c
         logger.c
+        usb_descriptors.c
+        ws2812.c
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -36,15 +39,20 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 
+target_compile_definitions(${PROJECT_NAME}
+    PRIVATE
+        CFG_TUSB_MCU=OPT_MCU_RP2040
+)
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         pico_stdlib
         hardware_pio
         hardware_spi
-        # tinyusb_device
-        # tunyusb_board
+        tinyusb_device
+        tinyusb_board
 )
 
 pico_add_extra_outputs(${PROJECT_NAME})
-pico_enable_stdio_usb(${PROJECT_NAME} 1)
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)

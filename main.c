@@ -1,32 +1,34 @@
 // Pico stuff
 #include "hardware/pio.h"
 #include "pico/stdlib.h"
+#include "tusb.h"
 
+#include "key.h"
 #include "logger.h"
 #include "oled.h"
+
 #include "ws2812.h"
 #include "ws2812.pio.h"
-
 #include <stdio.h>
 
 #define LED_PIN 16
 
 int main() {
-  stdio_init_all();
-
-
+  // Set up oled logging
   oled_init(false);
   logger_init();
+  key_init();
 
   log_info("Macropad starting");
-  log_info("OLED initialized");
 
-  sleep_ms(5000);
+  tusb_init();
+    
 
-  log_error("Hello World");
   while (true) {
-    sleep_ms(1000);
-    log_info("Tick");
+    tud_task();
+    key_scan();
+
+    sleep_ms(1);
   }
 }
 
