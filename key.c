@@ -3,12 +3,13 @@
 
 #include "key.h"
 #include "logger.h"
+#include "macropad_config.h"
 #include "usb_descriptors.h"
-
-#define KEY_LOGGING true
 
 static const uint8_t row_pins[KEY_ROWS] = KEY_ROW_PINS;
 static const uint8_t col_pins[KEY_COLS] = KEY_COL_PINS;
+
+static const uint8_t key_map[KEY_ROWS][KEY_COLS] = KEY_MAP;
 
 static bool key_state[KEY_ROWS][KEY_COLS];
 
@@ -48,21 +49,7 @@ void key_scan() {
 
     for (int j = 0; j < KEY_COLS; j++) {
       bool pressed = !gpio_get(col_pins[j]);
-
-      // Key pressed
-      if (pressed) {
-        key_state[i][j] = true;
-        if (KEY_LOGGING) {
-          log_info("Key pressed");
-        }
-      }
-      // key released
-      else {
-        key_state[i][j] = false;
-        if (KEY_LOGGING) {
-          log_info("Key released");
-        }
-      }
+      key_state[i][j]  =  pressed;
     }
     // deactivate row
     gpio_put(row_pins[i], 1);
@@ -80,7 +67,7 @@ void send_hid_report(void) {
   for (int r = 0; r < KEY_ROWS; r++) {
     for (int c = 0; c < KEY_COLS; c++) {
       if (key_state[r][c] && index < 6) {
-        keycode[index++] = HID_KEY_A;
+        keycode[index++] = key_map[r][c];
       }
     }
   }

@@ -11,8 +11,6 @@
 #include "ws2812.pio.h"
 #include <stdio.h>
 
-#define LED_PIN 16
-
 int main() {
   // Set up oled logging
   oled_init(false);

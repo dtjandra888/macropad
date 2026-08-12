@@ -10,33 +10,31 @@
 // -------------------------
 // Pin Definitions
 // -------------------------
-
-#define SPI_PORT spi1
-
-#define PIN_SCK 10
-#define PIN_MOSI 11
-#define PIN_DC 12
-#define PIN_CS 13
-#define PIN_RST 14
+#define OLED_SPI_PORT spi1
+#define OLED_PIN_SCK 10
+#define OLED_PIN_MOSI 11
+#define OLED_PIN_DC 12
+#define OLED_PIN_CS 13
+#define OLED_PIN_RST 14
 
 static uint8_t framebuffer[1024];
 
 static void oled_command(uint8_t cmd) {
-  gpio_put(PIN_CS, 0);
-  gpio_put(PIN_DC, 0);
+  gpio_put(OLED_PIN_CS, 0);
+  gpio_put(OLED_PIN_DC, 0);
 
-  spi_write_blocking(SPI_PORT, &cmd, 1);
+  spi_write_blocking(OLED_SPI_PORT, &cmd, 1);
 
-  gpio_put(PIN_CS, 1);
+  gpio_put(OLED_PIN_CS, 1);
 }
 
 static void oled_data(const uint8_t *data, size_t length) {
-  gpio_put(PIN_DC, 1); // Data mode
-  gpio_put(PIN_CS, 0);
+  gpio_put(OLED_PIN_DC, 1); // Data mode
+  gpio_put(OLED_PIN_CS, 0);
 
-  spi_write_blocking(SPI_PORT, data, length);
+  spi_write_blocking(OLED_SPI_PORT, data, length);
 
-  gpio_put(PIN_CS, 1);
+  gpio_put(OLED_PIN_CS, 1);
 }
 
 static const struct Font *find_char(char c) {
@@ -68,32 +66,32 @@ void oled_update(void) {
 
 void oled_init(bool reset) {
   // Initialize SPI
-  spi_init(SPI_PORT, 1000 * 1000); // 1 MHz
+  spi_init(OLED_SPI_PORT, 1000 * 1000); // 1 MHz
 
-  gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
-  gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
+  gpio_set_function(OLED_PIN_SCK, GPIO_FUNC_SPI);
+  gpio_set_function(OLED_PIN_MOSI, GPIO_FUNC_SPI);
 
   // Configure GPIO pins
-  gpio_init(PIN_DC);
-  gpio_set_dir(PIN_DC, GPIO_OUT);
+  gpio_init(OLED_PIN_DC);
+  gpio_set_dir(OLED_PIN_DC, GPIO_OUT);
 
-  gpio_init(PIN_CS);
-  gpio_set_dir(PIN_CS, GPIO_OUT);
+  gpio_init(OLED_PIN_CS);
+  gpio_set_dir(OLED_PIN_CS, GPIO_OUT);
 
-  gpio_init(PIN_RST);
-  gpio_set_dir(PIN_RST, GPIO_OUT);
+  gpio_init(OLED_PIN_RST);
+  gpio_set_dir(OLED_PIN_RST, GPIO_OUT);
 
-  gpio_put(PIN_CS, 1);
+  gpio_put(OLED_PIN_CS, 1);
 
   // Hardware Reset
   if (reset) {
-    gpio_put(PIN_RST, 1);
+    gpio_put(OLED_PIN_RST, 1);
     sleep_ms(10);
 
-    gpio_put(PIN_RST, 0);
+    gpio_put(OLED_PIN_RST, 0);
     sleep_ms(10);
 
-    gpio_put(PIN_RST, 1);
+    gpio_put(OLED_PIN_RST, 1);
     sleep_ms(100);
   }
 
