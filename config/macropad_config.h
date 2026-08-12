@@ -24,4 +24,7 @@
 // WS2812
 #define WS2812_PIN 16
 
+// Config button
+#define CONFIG_BTN_PIN 1
+
 #endif

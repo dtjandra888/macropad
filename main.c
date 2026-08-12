@@ -1,23 +1,41 @@
 // Pico stuff
-#include "hardware/pio.h"
 #include "pico/stdlib.h"
 #include "tusb.h"
 
 #include "key.h"
 #include "logger.h"
+#include "macropad_config.h"
 #include "oled.h"
 
 #include "ws2812.h"
-#include "ws2812.pio.h"
-#include <stdio.h>
+
+typedef enum { MODE_KEYBOARD, MODE_CONFIG } DeviceMode;
+
+DeviceMode get_device_mode(void) {
+  gpio_pull_up(CONFIG_BTN_PIN);
+  busy_wait_us(3); // settle time
+  bool pressed = !gpio_get(CONFIG_BTN_PIN);
+  return pressed ? MODE_CONFIG : MODE_KEYBOARD;
+}
 
 int main() {
   // Set up oled logging
   oled_init(false);
   logger_init();
   key_init();
+  ws2812_init();
 
   log_info("Macropad starting");
+
+  DeviceMode mode = get_device_mode();
+
+  if (mode == MODE_CONFIG) {
+    // blue
+    ws2812_set_rgb(0, 0, 255);
+  } else {
+    // white
+    ws2812_set_rgb(255, 255, 255);
+  }
 
   tusb_init();
 
@@ -34,40 +52,3 @@ int main() {
     }
   }
 }
-
-//
-//   printf("Hello! from RP2040\n");
-//   printf("Initializing ws2812\n");
-//
-//   oled_init(false);
-//   oled_clear();
-//   oled_update();
-//   sleep_ms(5000);
-//
-//   PIO pio = pio0;
-//   uint sm = 0;
-//   uint offset = 0;
-//
-//   bool success = pio_claim_free_sm_and_add_program_for_gpio_range(
-//       &ws2812_program, &pio, &sm, &offset, LED_PIN, 1, true);
-//   hard_assert(success);
-//
-//   printf("Program init\n");
-//   ws2812_program_init(pio, sm, offset, LED_PIN, 800000, false);
-//
-//   oled_draw_string(50, 50, "Hello World!");
-//   oled_update();
-//
-//   while (true) {
-//     printf("Tick\n");
-//     sleep_ms(5000);
-//
-//     put_pixel(pio, sm, urgb_u32(0xff, 0, 0));
-//     sleep_ms(1000);
-//     put_pixel(pio, sm, urgb_u32(0, 0xff, 0));
-//     sleep_ms(1000);
-//     put_pixel(pio, sm, urgb_u32(0, 0, 0xff));
-//   }
-//
-//   pio_remove_program_and_unclaim_sm(&ws2812_program, pio, sm, offset);
-//}

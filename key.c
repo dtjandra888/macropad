@@ -49,7 +49,7 @@ void key_scan() {
 
     for (int j = 0; j < KEY_COLS; j++) {
       bool pressed = !gpio_get(col_pins[j]);
-      key_state[i][j]  =  pressed;
+      key_state[i][j] = pressed;
     }
     // deactivate row
     gpio_put(row_pins[i], 1);
