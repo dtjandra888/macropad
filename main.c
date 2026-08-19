@@ -19,7 +19,7 @@ DeviceMode get_device_mode(void) {
 }
 
 int main() {
-  // Set up oled logging
+  // Initialize Hardware
   oled_init(false);
   logger_init();
   key_init();

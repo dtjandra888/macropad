@@ -63,9 +63,6 @@ extern "C" {
 #define CFG_TUSB_DEBUG 0
 #endif
 
-// Device mode
-#define CFG_TUSB_RHPORT0_MODE (OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED)
-
 // Enable Device stack
 #define CFG_TUD_ENABLED 1
 
@@ -94,8 +91,13 @@ extern "C" {
 #define CFG_TUD_ENDPOINT0_SIZE 64
 #endif
 
+// Device mode
+#define CFG_TUSB_RHPORT0_MODE (OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED)
+
 //------------- CLASS -------------//
 #define CFG_TUD_HID 1
+#define CFG_TUD_ECM_RNDIS 1
+
 #define CFG_TUD_CDC 0
 #define CFG_TUD_MSC 0
 #define CFG_TUD_MIDI 0

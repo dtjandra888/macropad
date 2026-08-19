@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(TINYUSB ${PICO_SDK_PATH}/lib/tinyusb)
+set(LWIP ${TINYUSB}/lib/lwip)
+
 set(PICO_BOARD waveshare_rp2040_zero)
 
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
@@ -29,6 +32,7 @@ target_sources(${PROJECT_NAME}
         hid.c
         oled.c
         logger.c
+        network.c
         usb_descriptors.c
         ws2812.c
 )
@@ -37,14 +41,16 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         include
         config
+        ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/generated
+        ${TINYUSB}/lib/networking
+        ${LWIP}/src/include
 )
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         CFG_TUSB_MCU=OPT_MCU_RP2040
 )
-
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         pico_stdlib
