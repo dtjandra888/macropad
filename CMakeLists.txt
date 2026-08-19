@@ -45,6 +45,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_BINARY_DIR}/generated
         ${TINYUSB}/lib/networking
         ${LWIP}/src/include
+        ${LWIP}/src/include/lwip/apps
 )
 
 target_compile_definitions(${PROJECT_NAME}
