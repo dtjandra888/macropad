@@ -29,7 +29,24 @@
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
+#ifndef __FSDATA_H__
+#define __FSDATA_H__
 
-#if defined(__ICCARM__)
-#pragma pack(1)
-#endif
+#include "lwip/opt.h"
+#include "fs.h"
+
+extern const struct fsdata_file *FS_ROOT;
+
+struct fsdata_file {
+  const struct fsdata_file *next;
+  const unsigned char *name;
+  const unsigned char *data;
+  int len;
+  u8_t http_header_included;
+#if HTTPD_PRECALCULATED_CHECKSUM
+  u16_t chksum_count;
+  const struct fsdata_chksum *chksum;
+#endif /* HTTPD_PRECALCULATED_CHECKSUM */
+};
+
+#endif /* __FSDATA_H__ */

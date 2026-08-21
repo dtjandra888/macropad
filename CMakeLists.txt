@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 pico_sdk_init()
 
+add_subdirectory(lib)
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 add_executable(${PROJECT_NAME})
@@ -32,7 +34,6 @@ target_sources(${PROJECT_NAME}
         hid.c
         oled.c
         logger.c
-        network.c
         usb_descriptors.c
         ws2812.c
 )
@@ -43,9 +44,6 @@ target_include_directories(${PROJECT_NAME}
         config
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/generated
-        ${TINYUSB}/lib/networking
-        ${LWIP}/src/include
-        ${LWIP}/src/include/lwip/apps
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -59,6 +57,7 @@ target_link_libraries(${PROJECT_NAME}
         hardware_spi
         tinyusb_device
         tinyusb_board
+        rndis
 )
 
 pico_add_extra_outputs(${PROJECT_NAME})
