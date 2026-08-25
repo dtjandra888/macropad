@@ -29,11 +29,13 @@ pico_generate_pio_header(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
     PRIVATE
         main.c
+
         font5x7.c
-        key.c
         hid.c
-        oled.c
+        key.c
         logger.c
+        macro.c
+        oled.c
         usb_descriptors.c
         ws2812.c
 )
