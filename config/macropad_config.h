@@ -3,15 +3,10 @@
 
 // Key matrix
 #define KEY_ROWS 1
-#define KEY_COLS 1
+#define KEY_COLS 2
 
 #define KEY_ROW_PINS {2}
-#define KEY_COL_PINS {3}
-
-#define KEY_MAP                                                                \
-  {                                                                            \
-      {HID_KEY_A},                                                             \
-  }
+#define KEY_COL_PINS {3, 4}
 
 // OLED
 #define OLED_SPI_PORT spi1

@@ -2,6 +2,7 @@
 #include "tusb.h"
 
 #include "key.h"
+#include "key_config.h"
 #include "logger.h"
 #include "macropad_config.h"
 #include "usb_descriptors.h"
@@ -9,9 +10,10 @@
 static const uint8_t row_pins[KEY_ROWS] = KEY_ROW_PINS;
 static const uint8_t col_pins[KEY_COLS] = KEY_COL_PINS;
 
-static const uint8_t key_map[KEY_ROWS][KEY_COLS] = KEY_MAP;
+// static const Macro *key_map[KEY_ROWS][KEY_COLS] = key_macros;
 
 static bool key_state[KEY_ROWS][KEY_COLS];
+static bool prev_key_state[KEY_ROWS][KEY_COLS];
 
 void key_init() {
   // Initialize GPIO
@@ -56,21 +58,17 @@ void key_scan() {
   }
 }
 
-void send_hid_report(void) {
-  if (!tud_hid_ready()) {
-    return;
-  }
-
-  uint8_t keycode[6] = {0};
-  int index = 0;
-
+void process_key_events(void) {
   for (int r = 0; r < KEY_ROWS; r++) {
     for (int c = 0; c < KEY_COLS; c++) {
-      if (key_state[r][c] && index < 6) {
-        keycode[index++] = key_map[r][c];
+      bool pressed = key_state[r][c];
+      bool previously_pressed = prev_key_state[r][c];
+
+      if (pressed && !previously_pressed) {
+        macro_start(&key_macros[r][c]);
       }
+
+      prev_key_state[r][c] = pressed;
     }
   }
-
-  tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
 }

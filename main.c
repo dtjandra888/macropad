@@ -3,7 +3,9 @@
 #include "tusb.h"
 
 #include "key.h"
+#include "key_config.h"
 #include "logger.h"
+#include "macro.h"
 #include "macropad_config.h"
 #include "oled.h"
 #include "rndis.h"
@@ -27,14 +29,15 @@ void keyboard_mode() {
     if (absolute_time_diff_us(get_absolute_time(), next_scan) <= 0) {
       next_scan = delayed_by_us(next_scan, 1000);
       key_scan();
-
-      send_hid_report();
+      process_key_events();
+      macro_task();
     }
   }
 }
 
 void config_mode() {
   rndis_init("macropad");
+  log_info("Starting at 192.168.7.1");
 
   while (true) {
     rndis_task();
