@@ -65,7 +65,8 @@ void process_key_events(void) {
       bool previously_pressed = prev_key_state[r][c];
 
       if (pressed && !previously_pressed) {
-        macro_start(&key_macros[r][c]);
+        // TODO: find cleaner, less error-prone way to do this
+        macro_start(key_macros[r * KEY_COLS + c]);
       }
 
       prev_key_state[r][c] = pressed;
