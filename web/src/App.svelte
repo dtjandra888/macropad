@@ -8,6 +8,7 @@
     let page: Page = "macros";
 </script>
 
+
 <svelte:head>
     <title>Macropad Configuration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
