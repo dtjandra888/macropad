@@ -1,71 +1,58 @@
 <script lang="ts">
-  import type { Macro } from "./Macros.svelte";
+  import type { Config } from "../types";
+  import JsonEditor from "./JsonEditor.svelte";
 
-  export let macros: Macro[] = [];
+  export let config: Config;
+  export let onConfigChange: (config: Config) => void;
+  export let onSave: () => Promise<void>;
 
-  let jsonText = "";
-  let jsonError = "";
+  let jsonText = JSON.stringify(config, null, 2);
+  let error = "";
 
-  $: if (jsonText === "") {
-    jsonText = JSON.stringify(macros, null, 2);
+  function updateJson(value: string): void {
+    jsonText = value;
   }
 
-  function applyJson(): void {
+  async function save(): Promise<void> {
+    error = "";
+
     try {
-      const parsed: unknown = JSON.parse(jsonText);
+      const parsed: Config = JSON.parse(jsonText);
 
-      if (!Array.isArray(parsed)) {
-        throw new Error("Configuration must be an array.");
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        typeof parsed.version !== "number" ||
+        !Array.isArray(parsed.macros)
+      ) {
+        throw new Error("Invalid configuration format.");
       }
 
-      for (const macro of parsed) {
-        if (
-          typeof macro !== "object" ||
-          macro === null ||
-          typeof macro.key !== "string" ||
-          typeof macro.name !== "string" ||
-          typeof macro.description !== "string"
-        ) {
-          throw new Error(
-            "Each macro must contain key, name, and description strings."
-          );
-        }
-      }
-
-      macros = parsed as Macro[];
-      jsonError = "";
-    } catch (error) {
-      if (error instanceof Error) {
-        jsonError = error.message;
-      } else {
-        jsonError = "Invalid JSON.";
-      }
+      onConfigChange(parsed);
+      await onSave();
+    } catch (err) {
+      error = err instanceof Error
+        ? err.message
+        : "Invalid JSON configuration.";
     }
   }
 </script>
 
-<section>
-  <div class="page-heading">
-    <div>
-      <h2>JSON</h2>
-      <p>Edit the current macropad configuration.</p>
-    </div>
+<div class="json-page">
+  <div class="json-header">
+    <h2>JSON</h2>
 
-    <button class="primary" onclick={applyJson}>
-      Apply JSON
+    <button class="primary" onclick={save}>
+      Save Changes
     </button>
   </div>
 
-  <textarea
-    class:error={jsonError !== ""}
-    bind:value={jsonText}
-    spellcheck="false"
-    aria-label="Macropad configuration JSON"
-  ></textarea>
-
-  {#if jsonError}
-    <p class="json-error">
-      {jsonError}
-    </p>
+  {#if error}
+    <p class="error">{error}</p>
   {/if}
-</section>
+
+  <JsonEditor
+    value={jsonText}
+    onChange={updateJson}
+  />
+</div>

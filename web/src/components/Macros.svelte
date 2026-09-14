@@ -1,57 +1,39 @@
 <script lang="ts">
-  export interface Macro {
-    key: string;
-    name: string;
-    description: string;
-  }
+    import type { Macro } from "../types";
 
-  export let macros: Macro[] = [
-    {
-      key: "1",
-      name: "Hello",
-      description: 'Types "Hello"',
-    },
-    {
-      key: "2",
-      name: "Ctrl + Shift + C",
-      description: "Copy",
-    },
-    {
-      key: "3",
-      name: "Unassigned",
-      description: "No macro assigned",
-    },
-  ];
+    export let macros: Macro[] = [];
+    export let onSave: () => Promise<void>;
 </script>
 
 <section>
-  <div class="page-heading">
-    <div>
-      <h2>Macros</h2>
-      <p>Configure what each key does.</p>
+    <div class="page-heading">
+        <div>
+            <h2>Macros</h2>
+            <p>Configure what each key does.</p>
+        </div>
+
+        <button class="primary" onclick={onSave}> Save Changes </button>
     </div>
 
-    <button class="primary">
-      Save Changes
-    </button>
-  </div>
+    <div class="macro-grid">
+        {#each macros as macro}
+            <article class="macro-card">
+                <div class="key">
+                    {macro.key}
+                </div>
 
-  <div class="macro-grid">
-    {#each macros as macro}
-      <article class="macro-card">
-        <div class="key">
-          {macro.key}
-        </div>
+                <div class="macro-info">
+                    <h3>{macro.name}</h3>
 
-        <div class="macro-info">
-          <h3>{macro.name}</h3>
-          <p>{macro.description}</p>
-        </div>
+                    {#if macro.strokes.length === 0}
+                        <p>No macro assigned</p>
+                    {:else}
+                        <p>{macro.strokes.length} keystroke(s)</p>
+                    {/if}
+                </div>
 
-        <button class="edit-button">
-          Edit
-        </button>
-      </article>
-    {/each}
-  </div>
+                <button class="edit-button"> Edit </button>
+            </article>
+        {/each}
+    </div>
 </section>

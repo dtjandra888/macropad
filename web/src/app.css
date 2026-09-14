@@ -203,4 +203,31 @@ main {
 .info-card span {
   color: #9ca3af;
 }
+.json-page {
+  width: 100%;
+}
 
+.json-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.json-header h2 {
+  margin: 0;
+}
+
+.json-page textarea {
+  display: block;
+  width: 100%;
+  min-height: 500px;
+  box-sizing: border-box;
+
+  resize: vertical;
+
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}

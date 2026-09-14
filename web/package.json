@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "bun --watch server.ts & vite",
+    "dev:web": "vite",
+    "dev:server": "bun --watch server.ts",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
@@ -17,5 +19,10 @@
     "svelte-check": "^4.7.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
+  },
+  "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "codemirror": "^6.0.2",
+    "express": "^5.2.1"
   }
 }

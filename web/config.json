@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "macros": [
+    {
+      "key": 1,
+      "name": "Hello",
+      "strokes": [
+        { "key": "H", "modifier": 0 },
+        { "key": "E", "modifier": 0 },
+        { "key": "L", "modifier": 0 },
+        { "key": "L", "modifier": 0 },
+        { "key": "O", "modifier": 0 }
+      ]
+    },
+    {
+      "key": 2,
+      "name": "Ctrl + Shift + C",
+      "strokes": [
+        { "key": "C", "modifier": 3 }
+      ]
+    },
+    {
+      "key": 3,
+      "name": "Unassigned",
+      "strokes": []
+    }
+  ]
+}
