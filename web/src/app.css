@@ -218,16 +218,40 @@ main {
   margin: 0;
 }
 
-.json-page textarea {
-  display: block;
+.json-editor {
   width: 100%;
   min-height: 500px;
-  box-sizing: border-box;
 
-  resize: vertical;
+  overflow: hidden;
 
-  padding: 1rem;
-  font-family: monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  border: 1px solid #374151;
+  border-radius: 10px;
+
+  background: #1f2937;
+}
+
+.json-editor .cm-editor {
+  min-height: 500px;
+}
+
+.json-editor .cm-scroller {
+  min-height: 500px;
+  overflow: auto;
+}
+
+.json-editor .cm-content {
+  padding: 16px 0;
+}
+
+.json-editor .cm-gutters {
+  background: #1f2937;
+  border-right: 1px solid #374151;
+}
+
+.json-editor .cm-activeLineGutter {
+  background: #374151;
+}
+
+.json-editor .cm-activeLine {
+  background: rgba(255, 255, 255, 0.03);
 }

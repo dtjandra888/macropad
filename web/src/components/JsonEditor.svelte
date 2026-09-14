@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { EditorState } from "@codemirror/state";
-  import { EditorView, basicSetup } from "codemirror";
-  import { json, jsonParseLinter } from "@codemirror/lang-json";
+  import { EditorView } from "@codemirror/view";
+  import { basicSetup } from "codemirror";
+  import { json } from "@codemirror/lang-json";
 
   export let value: string;
   export let onChange: (value: string) => void;
@@ -15,8 +16,6 @@
       extensions: [
         basicSetup,
         json(),
-        jsonParseLinter(),
-
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
@@ -36,4 +35,4 @@
   });
 </script>
 
-<div class="json-editor" bind:this={editor}></div>
+<div bind:this={editor}></div>
