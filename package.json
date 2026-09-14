@@ -1,0 +1,6 @@
+{
+  "dependencies": {},
+  "devDependencies": {
+    "svelte-language-server": "^0.18.4"
+  }
+}
