@@ -17,6 +17,7 @@ typedef struct {
     int length;
 } Macro;
 
+
 void macro_start(const Macro* macro);
 void macro_task(void);
 bool macro_running(void);

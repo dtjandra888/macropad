@@ -29,7 +29,8 @@ pico_generate_pio_header(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
     PRIVATE
         main.c
-
+        
+        config.c
         font5x7.c
         hid.c
         key.c
