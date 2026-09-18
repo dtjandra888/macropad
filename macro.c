@@ -20,7 +20,7 @@ static absolute_time_t next_action;
 
 bool macro_running(void) { return state != MACRO_IDLE; }
 
-// 
+// sets macro to current macro to begin macro process
 void macro_start(const Macro *macro) {
   if (macro == NULL || macro->length == 0)
     return;
@@ -33,6 +33,7 @@ void macro_start(const Macro *macro) {
   next_action = get_absolute_time();
 }
 
+// Executes macro if current macro is set
 void macro_task(void) {
   if (state == MACRO_IDLE) {
     return;

@@ -13,10 +13,9 @@ typedef struct {
 } KeyStroke;
 
 typedef struct {
+    uint8_t length;
     KeyStroke strokes[MACRO_MAX_STROKES];
-    int length;
 } Macro;
-
 
 void macro_start(const Macro* macro);
 void macro_task(void);

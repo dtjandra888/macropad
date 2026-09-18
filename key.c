@@ -3,14 +3,11 @@
 
 #include "key.h"
 #include "key_config.h"
-#include "logger.h"
 #include "macropad_config.h"
 #include "usb_descriptors.h"
 
 static const uint8_t row_pins[KEY_ROWS] = KEY_ROW_PINS;
 static const uint8_t col_pins[KEY_COLS] = KEY_COL_PINS;
-
-// static const Macro *key_map[KEY_ROWS][KEY_COLS] = key_macros;
 
 static bool key_state[KEY_ROWS][KEY_COLS];
 static bool prev_key_state[KEY_ROWS][KEY_COLS];
@@ -65,8 +62,8 @@ void process_key_events(void) {
       bool previously_pressed = prev_key_state[r][c];
 
       if (pressed && !previously_pressed) {
-        // TODO: find cleaner, less error-prone way to do this
-        macro_start(key_macros[r * KEY_COLS + c]);
+        int key = r * KEY_COLS + c;
+        macro_start(&config.macros[key]);
       }
 
       prev_key_state[r][c] = pressed;
