@@ -8,12 +8,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-// using final 4096 bytes of board
-// if firmware size gets close to 2 Mb this may not work
-#define CONFIG_FLASH_SIZE FLASH_SECTOR_SIZE
-#define CONFIG_FLASH_OFFSET (PICO_FLASH_SIZE_BYTES - CONFIG_FLASH_SIZE)
-
-#define CONFIG_MAGIC 0x4D414352u // "MACR"
+Config config;
 
 void save_config(const ConfigStorage* config) {
     uint8_t buffer[FLASH_PAGE_SIZE];
@@ -38,7 +33,7 @@ void load_config(ConfigStorage* config) {
 }
 
 // I have no idea how this works but I copied off wikipedia
-static uint32_t crc32(const uint8_t *data, size_t length) {
+uint32_t crc32(const uint8_t *data, size_t length) {
   uint32_t crc = 0xFFFFFFFFu;
 
   for (size_t i = 0; i < length; ++i) {

@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
+#include "config.h"
 #include "key.h"
 #include "key_config.h"
 #include "macropad_config.h"

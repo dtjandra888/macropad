@@ -58,6 +58,7 @@ target_link_libraries(${PROJECT_NAME}
         pico_stdlib
         hardware_pio
         hardware_spi
+        hardware_flash
         tinyusb_device
         tinyusb_board
         rndis

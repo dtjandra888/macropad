@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "tusb.h"
 
+#include "config.h"
 #include "key.h"
 #include "key_config.h"
 #include "logger.h"
@@ -44,6 +45,34 @@ void config_mode() {
   }
 }
 
+// checks if there is a previous config or if its first boot
+// If first boot it saves config, otherwise it loads it from flash
+void check_config_flash(void) {
+  ConfigStorage stored_config;
+
+  load_config(&stored_config);
+
+  if (config_is_valid(&stored_config)) {
+    config = stored_config.config;
+  } else {
+    config = default_config;
+
+    ConfigStorage new_config = {
+        .header =
+            {
+                .magic = CONFIG_MAGIC,
+                .size = sizeof(Config),
+            },
+        .config = config,
+    };
+
+    new_config.header.crc32 =
+        crc32((const uint8_t *)&new_config.config, sizeof(Config));
+
+    save_config(&new_config);
+  }
+}
+
 int main() {
   // Initialize Hardware
   oled_init(false);
@@ -51,6 +80,8 @@ int main() {
   key_init();
   ws2812_init();
   tusb_init();
+
+  check_config_flash();
 
   log_info("Macropad starting");
 
