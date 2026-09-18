@@ -5,8 +5,6 @@ export interface KeyStroke {
 }
 
 export interface Macro {
-  key: number;
-  name: string;
   strokes: KeyStroke[];
 }
 

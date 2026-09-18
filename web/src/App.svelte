@@ -37,17 +37,17 @@
     }
 
     async function saveConfig(): Promise<void> {
-        console.log("Saving configuration:", config);
+        const response = await fetch("/api/config", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(config),
+        });
 
-        // TODO: Send configuration to RP2040.
-        //
-        // const response = await fetch("/api/config", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify(config),
-        // });
+        if (!response.ok) {
+            throw new Error("Failed to save configuration.");
+        }
     }
 
     function setPage(newPage: Page): void {

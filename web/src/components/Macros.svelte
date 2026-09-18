@@ -16,14 +16,14 @@
     </div>
 
     <div class="macro-grid">
-        {#each macros as macro}
+        {#each macros as macro, index}
             <article class="macro-card">
                 <div class="key">
-                    {macro.key}
+                    {index}
                 </div>
 
                 <div class="macro-info">
-                    <h3>{macro.name}</h3>
+                    <h3>Key {index}</h3>
 
                     {#if macro.strokes.length === 0}
                         <p>No macro assigned</p>
