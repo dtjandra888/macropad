@@ -8,6 +8,8 @@
     "dev:web": "vite",
     "dev:server": "bun --watch server.ts",
     "build": "vite build",
+    "generate-fsdata": "bun scripts/generate-fsdata.ts",
+    "build:device": "bun run build && bun run generate-fsdata",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
