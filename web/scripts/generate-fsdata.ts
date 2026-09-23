@@ -169,7 +169,9 @@ async function main() {
   }
 
   // Generate filesystem linked list.
-  for (let i = 0; i < files.length; i++) {
+  // reversed because the variables have dependencies
+  // on each other
+  for (let i = files.length - 1; i >= 0; i--) {
     const file = files[i];
     const next = files[i + 1];
 
