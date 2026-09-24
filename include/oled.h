@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void oled_init(bool reset);
+void oled_init();
 
 void oled_clear(void);
 void oled_draw_pixel(int x, int y, int color);

@@ -75,7 +75,13 @@ void check_config_flash(void) {
 
 int main() {
   // Initialize Hardware
-  oled_init(false);
+  oled_init();
+    
+  // TODO: remove Testing oled code
+  oled_clear();
+  oled_draw_string(0, 0, "Oled Initilized");
+  oled_update();
+
   logger_init();
   key_init();
   ws2812_init();

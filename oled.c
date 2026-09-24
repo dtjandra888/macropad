@@ -64,7 +64,7 @@ void oled_update(void) {
   oled_data(framebuffer, sizeof(framebuffer));
 }
 
-void oled_init(bool reset) {
+void oled_init() {
   // Initialize SPI
   spi_init(OLED_SPI_PORT, 1000 * 1000); // 1 MHz
 
@@ -84,16 +84,14 @@ void oled_init(bool reset) {
   gpio_put(OLED_PIN_CS, 1);
 
   // Hardware Reset
-  if (reset) {
-    gpio_put(OLED_PIN_RST, 1);
-    sleep_ms(10);
+  gpio_put(OLED_PIN_RST, 1);
+  sleep_ms(10);
 
-    gpio_put(OLED_PIN_RST, 0);
-    sleep_ms(10);
+  gpio_put(OLED_PIN_RST, 0);
+  sleep_ms(10);
 
-    gpio_put(OLED_PIN_RST, 1);
-    sleep_ms(100);
-  }
+  gpio_put(OLED_PIN_RST, 1);
+  sleep_ms(100);
 
   // SSD1315 initialization sequence
   oled_command(0xAE); // Display OFF
@@ -131,6 +129,8 @@ void oled_init(bool reset) {
   oled_command(0x14);
 
   oled_command(0xAF); // Display ON
+
+  oled_clear();
 }
 
 void oled_clear(void) {

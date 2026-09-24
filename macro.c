@@ -1,5 +1,7 @@
 #include "macro.h"
 
+#include "logger.h"
+
 #include "tusb.h"
 #include "usb_descriptors.h"
 
@@ -54,6 +56,8 @@ void macro_task(void) {
     uint8_t keycode[6] = {0};
 
     keycode[0] = stroke.key;
+
+    log_info("Pressed Key %d", keycode[0]);
 
     tud_hid_keyboard_report(REPORT_ID_KEYBOARD, stroke.modifier, keycode);
 
