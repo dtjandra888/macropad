@@ -22,6 +22,7 @@ add_custom_command(
 add_library(httpd
     fs.c
     ${FSDATA}
+    config_api.c
     ${PICO_SDK_PATH}/lib/lwip/src/apps/http/httpd.c
 )
 

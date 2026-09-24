@@ -5,7 +5,7 @@ const DIST_DIR = "./dist";
 
 // Change this to wherever your firmware expects fsdata.c.
 // using dedicated fs directory for now
-const OUTPUT_FILE = "./fs/fsdata.c";
+const OUTPUT_FILE = process.argv[2] ?? "./fs/fsdata.c";
 
 interface FileEntry {
   path: string;
@@ -83,19 +83,8 @@ function escapeByte(byte: number): string {
 function generateDataArray(file: FileEntry): string {
   const pathBytes = Buffer.from(file.path + "\0", "utf8");
 
-  const header =
-    `HTTP/1.1 200 OK\r\n` +
-    `Server: lwIP/2.2.1\r\n` +
-    `Content-Type: ${file.contentType}\r\n` +
-    `Content-Length: ${file.data.length}\r\n` +
-    `Connection: keep-alive\r\n` +
-    `\r\n`;
-
-  const headerBytes = Buffer.from(header, "ascii");
-
   const bytes = Buffer.concat([
     pathBytes,
-    headerBytes,
     file.data,
   ]);
 
@@ -134,7 +123,7 @@ function generateFileNode(
     `const struct fsdata_file ${file.symbol.replace("data_", "file_")}[] = {`,
     `    {${next}, ${file.symbol}, ${file.symbol} + ${pathLength},`,
     `     sizeof(${file.symbol}) - ${pathLength},`,
-    `    FS_FILE_FLAGS_HEADER_INCLUDED | FS_FILE_FLAGS_HEADER_PERSISTENT}`,
+    `    0}`,
     `};`,
     "",
   ].join("\n");
