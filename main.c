@@ -50,7 +50,7 @@ void config_mode() {
 void check_config_flash(void) {
   ConfigStorage stored_config;
 
-  load_config(&stored_config);
+  // load_config(&stored_config);
 
   if (config_is_valid(&stored_config)) {
     config = stored_config.config;
@@ -77,11 +77,6 @@ int main() {
   // Initialize Hardware
   oled_init();
     
-  // TODO: remove Testing oled code
-  oled_clear();
-  oled_draw_string(0, 0, "Oled Initilized");
-  oled_update();
-
   logger_init();
   key_init();
   ws2812_init();

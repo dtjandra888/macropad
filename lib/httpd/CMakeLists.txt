@@ -26,8 +26,9 @@ add_library(httpd
     ${PICO_SDK_PATH}/lib/lwip/src/apps/http/httpd.c
 )
 
-target_include_directories(httpd INTERFACE
+target_include_directories(httpd PRIVATE
     .
+    ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
 
 target_link_libraries(httpd

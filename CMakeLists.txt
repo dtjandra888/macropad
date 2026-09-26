@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(TINYUSB ${PICO_SDK_PATH}/lib/tinyusb)
 set(LWIP ${TINYUSB}/lib/lwip)
-
 set(PICO_BOARD waveshare_rp2040_zero)
 
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
@@ -33,6 +31,7 @@ target_sources(${PROJECT_NAME}
         config.c
         font5x7.c
         hid.c
+        hid_json.c
         key.c
         logger.c
         macro.c
