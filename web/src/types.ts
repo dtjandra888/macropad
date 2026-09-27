@@ -1,7 +1,7 @@
 
 export interface KeyStroke {
   key: string;
-  modifier: number;
+  modifier: string[];
 }
 
 export interface Macro {
@@ -9,6 +9,5 @@ export interface Macro {
 }
 
 export interface Config {
-  version: number;
   macros: Macro[];
 }

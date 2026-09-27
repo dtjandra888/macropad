@@ -42,14 +42,14 @@ size_t config_to_json(char *buffer, size_t size) {
 
       const char *key = hid_key_to_string(stroke->key);
 
-      offset += snprintf(buffer + offset, size - offset,
-                         "{\"key\":\"%s\",\"modifiers\":[",
-                         key ? key : "HID_UNKNOWN");
+      offset +=
+          snprintf(buffer + offset, size - offset,
+                   "{\"key\":\"%s\",\"modifiers\":", key ? key : "HID_UNKNOWN");
 
       offset +=
           modifiers_to_json(buffer + offset, size - offset, stroke->modifier);
 
-      offset += snprintf(buffer + offset, size - offset, "]}");
+      offset += snprintf(buffer + offset, size - offset, "}");
     }
 
     offset += snprintf(buffer + offset, size - offset, "]}");
