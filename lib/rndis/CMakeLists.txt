@@ -1,4 +1,3 @@
-# This code was stolen from GP2040-CE and is under MIT license
 
 # MIT License
 # 

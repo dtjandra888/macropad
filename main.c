@@ -50,7 +50,7 @@ void config_mode() {
 void check_config_flash(void) {
   ConfigStorage stored_config;
 
-  // load_config(&stored_config);
+  load_config(&stored_config);
 
   if (config_is_valid(&stored_config)) {
     config = stored_config.config;
