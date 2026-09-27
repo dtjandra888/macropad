@@ -10,7 +10,6 @@
     let page: Page = "macros";
 
     let config: Config = {
-        version: 1,
         macros: [],
     };
 
