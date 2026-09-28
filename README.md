@@ -22,7 +22,7 @@ The hardware includes:
 * 128×64 OLED display
 * Push button
 
-The PCB was designed specifically for this project in **KiCad**. You can view these files [here](https://github.com/dtjandra888/Hardware/tree/main/macro)
+The PCB was designed specifically for this project in **KiCad**. You can view these files [here](https://github.com/dtjandra888/Hardware/tree/main/macro).
 
 ![PCB](docs/images/pcb.png)
 
