@@ -6,7 +6,7 @@ The project combines custom hardware, embedded firmware, and a web-based configu
 
 <!-- Information about building this yourself can be found here. (TBC)-->
 
-<img src="docs/images/macro.jpeg" width="500">
+<img src="docs/images/macro.jpeg" width="300">
 
 ---
 
@@ -24,7 +24,7 @@ The hardware includes:
 
 The PCB was designed specifically for this project in **KiCad**. You can view these files [here](https://github.com/dtjandra888/Hardware/tree/main/macro).
 
-<img src="docs/images/pcb.jpeg" width="500">
+<img src="docs/images/pcb.jpeg" width="300">
 
 ---
 
