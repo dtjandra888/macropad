@@ -7,6 +7,13 @@
 
 #include "tusb.h"
 
+#define KEY_DEBOUNCE_MS 5
+#define KEY_DEBOUNCE_US (KEY_DEBOUNCE_MS * 1000)
+
+// Hold-to-repeat: wait this long after the first press before repeating
+#define MACRO_REPEAT_DELAY_MS 500
+#define MACRO_REPEAT_INTERVAL_MS 50
+
 /*
  * Key 0: types "Hello"
  */

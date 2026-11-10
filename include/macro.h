@@ -17,7 +17,9 @@ typedef struct {
     KeyStroke strokes[MACRO_MAX_STROKES];
 } Macro;
 
-void macro_start(const Macro* macro);
+// Returns true if the macro was started, false if it was empty or another
+// macro is still running.
+bool macro_start(const Macro* macro);
 void macro_task(void);
 bool macro_running(void);
 

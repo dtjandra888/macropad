@@ -8,6 +8,12 @@
 #define KEY_ROW_PINS {5}
 #define KEY_COL_PINS {8, 7, 6}
 
+#define KEY_DEBOUNCE_MS 5
+
+// Hold-to-repeat: wait this long after the first press before repeating
+#define MACRO_REPEAT_DELAY_MS 500
+#define MACRO_REPEAT_INTERVAL_MS 50
+
 // OLED
 #define OLED_SPI_PORT spi1
 #define OLED_PIN_SCK 10
