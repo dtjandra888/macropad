@@ -31,6 +31,7 @@ target_sources(${PROJECT_NAME}
         config.c
         font5x7.c
         hid.c
+        hid_report.c
         hid_json.c
         key.c
         logger.c

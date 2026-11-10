@@ -337,39 +337,84 @@ bool parse_strokes(JsonParser *parser, Macro *macro) {
 }
 
 /*
- * Parse one macro:
+ * Parse a macro mode string: "macro" or "hold".
+ */
+static bool parse_mode(JsonParser *parser, uint8_t *mode) {
+  char mode_name[8];
+
+  if (!parse_string(parser, mode_name, sizeof(mode_name))) {
+    return false;
+  }
+
+  if (strcmp(mode_name, "macro") == 0) {
+    *mode = MACRO_MODE_SEQUENCE;
+    return true;
+  }
+
+  if (strcmp(mode_name, "hold") == 0) {
+    *mode = MACRO_MODE_HOLD;
+    return true;
+  }
+
+  return false;
+}
+
+/*
+ * Parse one macro, properties in any order:
  *
  * {
+ *     "mode": "macro" | "hold",   (optional, defaults to "macro")
  *     "strokes": [...]
  * }
+ *
+ * A hold macro must have exactly one stroke.
  */
 bool parse_macro(JsonParser *parser, Macro *macro) {
   char property[16];
+  bool has_strokes = false;
+
+  macro->mode = MACRO_MODE_SEQUENCE;
 
   if (!consume_char(parser, '{')) {
     return false;
   }
 
-  /*
-   * The only property in a macro is "strokes".
-   */
-  if (!parse_string(parser, property, sizeof(property))) {
+  while (true) {
+    if (!parse_string(parser, property, sizeof(property))) {
+      return false;
+    }
+
+    if (!consume_char(parser, ':')) {
+      return false;
+    }
+
+    if (strcmp(property, "strokes") == 0) {
+      if (!parse_strokes(parser, macro)) {
+        return false;
+      }
+      has_strokes = true;
+    } else if (strcmp(property, "mode") == 0) {
+      if (!parse_mode(parser, &macro->mode)) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    if (consume_char(parser, '}')) {
+      break;
+    }
+
+    if (!consume_char(parser, ',')) {
+      return false;
+    }
+  }
+
+  if (!has_strokes) {
     return false;
   }
 
-  if (strcmp(property, "strokes") != 0) {
-    return false;
-  }
-
-  if (!consume_char(parser, ':')) {
-    return false;
-  }
-
-  if (!parse_strokes(parser, macro)) {
-    return false;
-  }
-
-  if (!consume_char(parser, '}')) {
+  if (macro->mode == MACRO_MODE_HOLD && macro->length != 1) {
     return false;
   }
 

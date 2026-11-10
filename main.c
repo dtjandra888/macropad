@@ -3,6 +3,7 @@
 #include "tusb.h"
 
 #include "config.h"
+#include "hid_report.h"
 #include "key.h"
 #include "key_config.h"
 #include "logger.h"
@@ -33,6 +34,7 @@ void keyboard_mode() {
       key_scan();
       process_key_events();
       macro_task();
+      hid_report_task();
     }
   }
 }

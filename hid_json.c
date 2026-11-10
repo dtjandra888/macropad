@@ -14,6 +14,9 @@ typedef struct {
 } HidKeyName;
 
 static const HidKeyName hid_keys[] = {
+    // No key: for modifier-only strokes (e.g. holding Shift)
+    {HID_KEY_NONE, "HID_NONE"},
+
     {HID_KEY_A, "HID_A"},
     {HID_KEY_B, "HID_B"},
     {HID_KEY_C, "HID_C"},

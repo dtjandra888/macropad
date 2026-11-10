@@ -2,6 +2,7 @@
 #include "tusb.h"
 
 #include "config.h"
+#include "hid_report.h"
 #include "key.h"
 #include "key_config.h"
 #include "macropad_config.h"
@@ -82,28 +83,49 @@ void key_scan() {
   }
 }
 
+// Hold mode: mirror the physical key. Pressed on the down edge, released on
+// the up edge; the host handles any key repeat.
+static void handle_hold_key(int slot, const Macro *macro, bool pressed,
+                            bool previously_pressed) {
+  if (pressed && !previously_pressed) {
+    const KeyStroke *stroke = &macro->strokes[0];
+    hid_report_hold(slot, stroke->key, stroke->modifier);
+  } else if (!pressed && previously_pressed) {
+    hid_report_release(slot);
+  }
+}
+
+// Sequence mode: play the macro once on press, then repeat while held.
+static void handle_macro_key(int r, int c, const Macro *macro, bool pressed,
+                             bool previously_pressed) {
+  if (!pressed)
+    return;
+
+  absolute_time_t now = get_absolute_time();
+  bool repeat_macro = absolute_time_diff_us(next_repeat[r][c], now) >= 0;
+
+  if (!previously_pressed) {
+    // First press: fire once, then wait before repeating
+    macro_start(macro);
+    next_repeat[r][c] = delayed_by_ms(now, MACRO_REPEAT_DELAY_MS);
+  } else if (repeat_macro && macro_start(macro)) {
+    // Held: repeat. If another macro is still running, retry next scan.
+    next_repeat[r][c] = delayed_by_ms(now, MACRO_REPEAT_INTERVAL_MS);
+  }
+}
+
 void process_key_events(void) {
   for (int r = 0; r < KEY_ROWS; r++) {
     for (int c = 0; c < KEY_COLS; c++) {
+      int slot = r * KEY_COLS + c;
+      const Macro *macro = &config.macros[slot];
       bool pressed = key_state[r][c];
       bool previously_pressed = prev_key_state[r][c];
 
-      if (!pressed) {
-        prev_key_state[r][c] = pressed;
-        continue;
-      }
-
-      const Macro *macro = &config.macros[r * KEY_COLS + c];
-      absolute_time_t now = get_absolute_time();
-      bool repeat_macro = absolute_time_diff_us(next_repeat[r][c], now) >= 0;
-
-      if (!previously_pressed) {
-        // First press: fire once, then wait before repeating
-        macro_start(macro);
-        next_repeat[r][c] = delayed_by_ms(now, MACRO_REPEAT_DELAY_MS);
-      } else if (repeat_macro && macro_start(macro)) {
-        // Held: repeat. If another macro is still running, retry next scan.
-        next_repeat[r][c] = delayed_by_ms(now, MACRO_REPEAT_INTERVAL_MS);
+      if (macro->mode == MACRO_MODE_HOLD && macro->length == 1) {
+        handle_hold_key(slot, macro, pressed, previously_pressed);
+      } else {
+        handle_macro_key(r, c, macro, pressed, previously_pressed);
       }
 
       prev_key_state[r][c] = pressed;

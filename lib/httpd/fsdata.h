@@ -33,20 +33,9 @@
 #define __FSDATA_H__
 
 #include "lwip/opt.h"
+// struct fsdata_file comes from lwIP (lwip/apps/fs.h, via fs.h)
 #include "fs.h"
 
 extern const struct fsdata_file *FS_ROOT;
-
-struct fsdata_file {
-  const struct fsdata_file *next;
-  const unsigned char *name;
-  const unsigned char *data;
-  int len;
-  u8_t http_header_included;
-#if HTTPD_PRECALCULATED_CHECKSUM
-  u16_t chksum_count;
-  const struct fsdata_chksum *chksum;
-#endif /* HTTPD_PRECALCULATED_CHECKSUM */
-};
 
 #endif /* __FSDATA_H__ */

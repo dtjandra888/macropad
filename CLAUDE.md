@@ -25,7 +25,7 @@ bun run dev            # vite dev server + mock API (server.ts, port 3000, proxi
 bun run check          # svelte-check + tsc
 bun run test:run       # vitest, all tests once
 bunx vitest run tests/config.test.ts   # single test file
-bun run build:device   # vite build + regenerate fsdata.c (CMake does this automatically)
+bun run build:device   # vite build + write web/fs/fsdata.c (for inspection; CMake generates its own copy)
 ```
 
 The mock server (`web/server.ts`) reads/writes `web/config.json`, which uses an older format (`modifier` as a number, keys without the `HID_` prefix) than the firmware's current JSON (`"key": "HID_C"`, `"modifiers": ["HID_MOD_LCTRL"]`).
@@ -34,7 +34,7 @@ The mock server (`web/server.ts`) reads/writes `web/config.json`, which uses an 
 
 ### Two boot modes (`main.c`)
 At boot, the config button (`CONFIG_BTN_PIN`) is sampled once:
-- **Keyboard mode** (default): 1 ms loop of `key_scan()` → `process_key_events()` → `macro_task()`. Key index `r * KEY_COLS + c` maps directly to `config.macros[index]`; `macro.c` replays strokes as USB HID reports.
+- **Keyboard mode** (default): 1 ms loop of `key_scan()` → `process_key_events()` → `macro_task()`. Key index `r * KEY_COLS + c` maps directly to `config.macros[index]`; Each `Macro` has a `mode`: `MACRO_MODE_SEQUENCE` (`macro.c` plays the strokes, repeating while held) or `MACRO_MODE_HOLD` (`strokes[0]` stays pressed while the physical key is held). `hid_report.c` is the only code that sends keyboard reports: held keys (one slot per physical key) and the macro's current stroke are merged into one report, sent only when it changes.
 - **Config mode** (button held, LED turns blue): starts a USB network interface (`lib/rndis`) with an lwIP HTTP server at 192.168.7.1. Never returns to keyboard mode without a reset.
 
 The USB device depends on the boot mode (`usb_descriptors_set_network_mode()`, called in `main.c` before `tusb_init()`): keyboard mode is a HID-only device (PID 0x4010, 1 configuration); config mode is a network-only device (PID 0x4011) with two configurations — RNDIS (Windows/Linux) and CDC-ECM (macOS/Linux). Never combine HID with the network device: Windows only loads its composite driver for single-configuration devices, and otherwise fails the whole device with Code 10. Windows 7+ binds RNDIS via the class codes in `TUD_RNDIS_DESCRIPTOR` (0xE0/0x01/0x03); there are no Microsoft OS descriptors. Linux picks the ECM configuration and Windows always uses RNDIS (config 1), so RNDIS bugs only show on Windows.
@@ -53,7 +53,7 @@ The USB device depends on the boot mode (`usb_descriptors_set_network_mode()`, c
 - `logger.c` logs to the OLED (`log_info`/`log_error`), not to UART/USB stdio (both disabled).
 
 ### Web UI embedding
-`lib/httpd/CMakeLists.txt` runs `bun run build` and `bun run generate-fsdata` (`web/scripts/generate-fsdata.ts`) whenever web sources change, writing `lib/httpd/fsdata.c` **into the source tree**. That generated file is committed, so expect it in diffs after web changes. Vite uses `base: "./"` so assets resolve from the device's filesystem.
+`lib/httpd/CMakeLists.txt` runs `bun run build` and `bun run generate-fsdata` (`web/scripts/generate-fsdata.ts`) whenever web sources change, writing `fsdata.c` into the build tree (`build/lib/httpd/fsdata.c`). It is not committed (gitignored); `lib/httpd/fsdata.h` is hand-written and stays in the repo. Vite uses `base: "./"` so assets resolve from the device's filesystem.
 
 ### Host networking (Linux)
 If the device's web server is unreachable in config mode, bring up the interface manually (from `lib/httpd/notes-for-when-you-forget.md`):

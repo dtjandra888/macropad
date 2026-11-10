@@ -4,17 +4,26 @@
 
 # fsdata generation
 set(WEB_DIR ${CMAKE_CURRENT_LIST_DIR}/../../web)
-set(FSDATA ${CMAKE_CURRENT_LIST_DIR}/fsdata.c)
+# Generated into the build tree; not committed (see .gitignore)
+set(FSDATA ${CMAKE_CURRENT_BINARY_DIR}/fsdata.c)
 
+# Only glob the source folders: GLOB_RECURSE treats every pattern as
+# recursive, so top-level files would also match copies inside node_modules
+# and dist (the build's own output).
 file(GLOB_RECURSE WEB_SOURCES CONFIGURE_DEPENDS
     ${WEB_DIR}/src/*
-    ${WEB_DIR}/static/*
+    ${WEB_DIR}/public/*
+)
+
+list(APPEND WEB_SOURCES
     ${WEB_DIR}/index.html
     ${WEB_DIR}/package.json
     ${WEB_DIR}/bun.lock
-    ${WEB_DIR}/vite.config.*
-    ${WEB_DIR}/svelte.config.*
+    ${WEB_DIR}/vite.config.ts
+    ${WEB_DIR}/svelte.config.js
     ${WEB_DIR}/tsconfig.json
+    ${WEB_DIR}/tsconfig.app.json
+    ${WEB_DIR}/tsconfig.node.json
 )
 
 add_custom_command(

@@ -150,4 +150,28 @@ describe("Macros", () => {
 
         expect(screen.queryAllByRole("article")).toHaveLength(0);
     });
+    test("displays the held key for hold macros", () => {
+        const onSave = vi.fn().mockResolvedValue(undefined);
+
+        render(Macros, {
+            props: {
+                macros: [
+                    {
+                        mode: "hold",
+                        strokes: [{ key: "HID_W", modifiers: [] }],
+                    },
+                    {
+                        mode: "hold",
+                        strokes: [
+                            { key: "HID_NONE", modifiers: ["HID_MOD_LSHIFT"] },
+                        ],
+                    },
+                ],
+                onSave,
+            },
+        });
+
+        screen.getByText("Hold: HID_W");
+        screen.getByText("Hold: HID_MOD_LSHIFT");
+    });
 });

@@ -25,11 +25,15 @@ err_t fs_open(struct fs_file *file, const char *name)
             sizeof(api_response)
         );
 
+        // index == len: the whole response is already in memory, so httpd
+        // closes the connection once it's sent, which ends the response.
+        // Don't set FS_FILE_FLAGS_HEADER_PERSISTENT: the Content-Length header
+        // it adds needs a ~1.5 KB copy that doesn't fit lwIP's 1600-byte heap
+        // (MEM_SIZE), which stalls every response.
         file->data = api_response;
         file->len = (int)len;
-        file->index = 0;
-        file->pextension = NULL;
-        file->http_header_included = 0;
+        file->index = (int)len;
+        file->flags = 0;
 
         return ERR_OK;
     }
@@ -39,8 +43,7 @@ err_t fs_open(struct fs_file *file, const char *name)
             file->data = (const char *)f->data;
             file->len = f->len;
             file->index = f->len;
-            file->pextension = NULL;
-            file->http_header_included = f->http_header_included;
+            file->flags = f->flags;
 
             return ERR_OK;
         }

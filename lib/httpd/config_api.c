@@ -31,7 +31,10 @@ size_t config_to_json(char *buffer, size_t size) {
       offset += snprintf(buffer + offset, size - offset, ",");
     }
 
-    offset += snprintf(buffer + offset, size - offset, "{\"strokes\":[");
+    const char *mode = macro->mode == MACRO_MODE_HOLD ? "hold" : "macro";
+
+    offset += snprintf(buffer + offset, size - offset,
+                       "{\"mode\":\"%s\",\"strokes\":[", mode);
 
     for (int j = 0; j < macro->length; j++) {
       const KeyStroke *stroke = &macro->strokes[j];

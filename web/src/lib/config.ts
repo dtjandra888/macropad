@@ -27,6 +27,20 @@ export function isValidConfig(value: unknown): value is Config {
             return false;
         }
 
+        if (
+            macroObject.mode !== undefined &&
+            macroObject.mode !== "macro" &&
+            macroObject.mode !== "hold"
+        ) {
+            console.log("Invalid: mode is not 'macro' or 'hold'", macroObject.mode);
+            return false;
+        }
+
+        if (macroObject.mode === "hold" && macroObject.strokes.length !== 1) {
+            console.log("Invalid: hold macro must have exactly one stroke");
+            return false;
+        }
+
         for (const stroke of macroObject.strokes) {
             if (typeof stroke !== "object" || stroke === null) {
                 console.log("Invalid: stroke is not an object");

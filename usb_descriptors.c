@@ -141,7 +141,7 @@ static uint8_t const keyboard_configuration[] = {
     // address, size & polling interval
     TUD_HID_DESCRIPTOR(ITF_KBD_HID, 0, HID_ITF_PROTOCOL_NONE,
                        sizeof(desc_hid_report), EPNUM_HID,
-                       CFG_TUD_HID_EP_BUFSIZE, 5),
+                       CFG_TUD_HID_EP_BUFSIZE, 1),
 };
 
 // Config mode: RNDIS (config 1, Windows/Linux) or CDC-ECM (config 2,

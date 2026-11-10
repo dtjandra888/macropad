@@ -12,8 +12,16 @@ typedef struct {
     uint8_t modifier;
 } KeyStroke;
 
+typedef enum {
+    // Play the strokes in order; repeats while the key is held
+    MACRO_MODE_SEQUENCE = 0,
+    // Hold strokes[0] down for as long as the physical key is held
+    MACRO_MODE_HOLD = 1,
+} MacroMode;
+
 typedef struct {
     uint8_t length;
+    uint8_t mode; // MacroMode; HOLD requires length == 1
     KeyStroke strokes[MACRO_MAX_STROKES];
 } Macro;
 

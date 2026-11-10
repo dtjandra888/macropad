@@ -3,6 +3,13 @@
 
     export let macros: Macro[] = [];
     export let onSave: () => Promise<void>;
+
+    // e.g. "HID_MOD_LSHIFT + HID_W"; HID_NONE is left out for modifier-only holds
+    function holdLabel(macro: Macro): string {
+        const { key, modifiers } = macro.strokes[0];
+        const parts = key === "HID_NONE" ? modifiers : [...modifiers, key];
+        return parts.join(" + ");
+    }
 </script>
 
 <section>
@@ -27,6 +34,8 @@
 
                     {#if macro.strokes.length === 0}
                         <p>No macro assigned</p>
+                    {:else if macro.mode === "hold"}
+                        <p>Hold: {holdLabel(macro)}</p>
                     {:else}
                         <p>{macro.strokes.length} keystroke(s)</p>
                     {/if}

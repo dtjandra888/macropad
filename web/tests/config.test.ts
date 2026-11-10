@@ -257,4 +257,48 @@ describe("isValidConfig", () => {
 
     expect(isValidConfig(config)).toBe(false);
   });
+  describe("mode", () => {
+    const stroke = { key: "HID_W", modifiers: [] };
+
+    test("accepts a macro without a mode", () => {
+      expect(isValidConfig({ macros: [{ strokes: [stroke] }] })).toBe(true);
+    });
+
+    test("accepts mode 'macro'", () => {
+      const config = { macros: [{ mode: "macro", strokes: [stroke, stroke] }] };
+      expect(isValidConfig(config)).toBe(true);
+    });
+
+    test("accepts a hold macro with one stroke", () => {
+      const config = { macros: [{ mode: "hold", strokes: [stroke] }] };
+      expect(isValidConfig(config)).toBe(true);
+    });
+
+    test("accepts a modifier-only hold", () => {
+      const config = {
+        macros: [
+          {
+            mode: "hold",
+            strokes: [{ key: "HID_NONE", modifiers: ["HID_MOD_LSHIFT"] }],
+          },
+        ],
+      };
+      expect(isValidConfig(config)).toBe(true);
+    });
+
+    test("rejects a hold macro with more than one stroke", () => {
+      const config = { macros: [{ mode: "hold", strokes: [stroke, stroke] }] };
+      expect(isValidConfig(config)).toBe(false);
+    });
+
+    test("rejects a hold macro with no strokes", () => {
+      const config = { macros: [{ mode: "hold", strokes: [] }] };
+      expect(isValidConfig(config)).toBe(false);
+    });
+
+    test("rejects an unknown mode", () => {
+      const config = { macros: [{ mode: "toggle", strokes: [stroke] }] };
+      expect(isValidConfig(config)).toBe(false);
+    });
+  });
 });

@@ -2,8 +2,8 @@
 
 #include "logger.h"
 
-#include "tusb.h"
-#include "usb_descriptors.h"
+#include "hid_report.h"
+#include "pico/time.h"
 
 #include <stddef.h>
 
@@ -42,7 +42,9 @@ void macro_task(void) {
     return;
   }
 
-  if (!tud_hid_ready()) {
+  // Wait until the previous press/release has reached the host, so strokes
+  // are never merged away
+  if (hid_report_pending()) {
     return;
   }
   if (absolute_time_diff_us(get_absolute_time(), next_action) > 0) {
@@ -54,13 +56,9 @@ void macro_task(void) {
   switch (state) {
 
   case MACRO_PRESS: {
-    uint8_t keycode[6] = {0};
+    log_info("Pressed Key %d", stroke.key);
 
-    keycode[0] = stroke.key;
-
-    log_info("Pressed Key %d", keycode[0]);
-
-    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, stroke.modifier, keycode);
+    hid_report_set_macro(stroke.key, stroke.modifier);
 
     state = MACRO_RELEASE;
     next_action = delayed_by_ms(get_absolute_time(), MACRO_KEY_DELAY_MS);
@@ -70,7 +68,7 @@ void macro_task(void) {
 
   case MACRO_RELEASE:
 
-    tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, NULL);
+    hid_report_clear_macro();
 
     current_stroke++;
 
