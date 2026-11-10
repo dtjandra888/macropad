@@ -29,9 +29,15 @@
 #include "bsp/board_api.h"
 #include "tusb.h"
 
-// Unique PID per example: guarantees re-enumeration on re-flash and a fresh
-// host driver match.
-#define USB_PID 0x400f
+// Windows only treats a device as composite (separate driver per function)
+// when it has a single configuration. The network device needs two
+// configurations (RNDIS for Windows, CDC-ECM for macOS), so HID and network
+// must never be combined: keyboard mode is HID only, config mode is network
+// only. Separate PIDs keep Windows' per-device driver cache apart.
+#define USB_VID 0xCafe
+#define USB_PID_KEYBOARD 0x4010
+#define USB_PID_NETWORK 0x4011
+#define USB_BCD 0x0200
 
 // String Descriptor Index
 enum {
@@ -43,15 +49,36 @@ enum {
   STRID_MAC
 };
 
-enum { CONFIG_ID_RNDIS = 0, CONFIG_ID_ECM = 1, CONFIG_ID_COUNT };
+static bool network_mode = false;
 
-#define USB_VID 0xCafe
-#define USB_BCD 0x0200
+void usb_descriptors_set_network_mode(bool enabled) { network_mode = enabled; }
 
 //--------------------------------------------------------------------+
 // Device Descriptors
 //--------------------------------------------------------------------+
-static tusb_desc_device_t const desc_device = {
+enum { CONFIG_ID_RNDIS = 0, CONFIG_ID_ECM = 1, CONFIG_ID_NET_COUNT };
+
+static tusb_desc_device_t const desc_device_keyboard = {
+    .bLength = sizeof(tusb_desc_device_t),
+    .bDescriptorType = TUSB_DESC_DEVICE,
+    .bcdUSB = USB_BCD,
+    // Class is defined per interface
+    .bDeviceClass = 0x00,
+    .bDeviceSubClass = 0x00,
+    .bDeviceProtocol = 0x00,
+    .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
+
+    .idVendor = USB_VID,
+    .idProduct = USB_PID_KEYBOARD,
+    .bcdDevice = 0x0100,
+
+    .iManufacturer = STRID_MANUFACTURER,
+    .iProduct = STRID_PRODUCT,
+    .iSerialNumber = STRID_SERIAL,
+
+    .bNumConfigurations = 1};
+
+static tusb_desc_device_t const desc_device_network = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
     .bcdUSB = USB_BCD,
@@ -61,19 +88,20 @@ static tusb_desc_device_t const desc_device = {
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
 
     .idVendor = USB_VID,
-    .idProduct = USB_PID,
-    .bcdDevice = 0x0101,
+    .idProduct = USB_PID_NETWORK,
+    .bcdDevice = 0x0100,
 
     .iManufacturer = STRID_MANUFACTURER,
     .iProduct = STRID_PRODUCT,
     .iSerialNumber = STRID_SERIAL,
 
-    .bNumConfigurations = CONFIG_ID_COUNT};
+    .bNumConfigurations = CONFIG_ID_NET_COUNT};
 
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
 uint8_t const *tud_descriptor_device_cb(void) {
-  return (uint8_t const *)&desc_device;
+  return (uint8_t const *)(network_mode ? &desc_device_network
+                                        : &desc_device_keyboard);
 }
 
 //--------------------------------------------------------------------+
@@ -82,10 +110,6 @@ uint8_t const *tud_descriptor_device_cb(void) {
 
 uint8_t const desc_hid_report[] = {
     TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(REPORT_ID_KEYBOARD)),
-    //     TUD_HID_REPORT_DESC_MOUSE(HID_REPORT_ID(REPORT_ID_MOUSE)),
-    //     TUD_HID_REPORT_DESC_STYLUS_PEN(HID_REPORT_ID(REPORT_ID_STYLUS_PEN)),
-    //     TUD_HID_REPORT_DESC_CONSUMER(HID_REPORT_ID(REPORT_ID_CONSUMER_CONTROL)),
-    //     TUD_HID_REPORT_DESC_GAMEPAD(HID_REPORT_ID(REPORT_ID_GAMEPAD))
 };
 
 // Invoked when received GET HID REPORT DESCRIPTOR
@@ -97,68 +121,64 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance) {
 }
 
 //--------------------------------------------------------------------+
-// Configuration Descriptor
+// Configuration Descriptors
 //--------------------------------------------------------------------+
 
-// The RNDIS and CDC-ECM descriptor macros each create two interfaces (control
-// + data), so both must be counted. Linux tolerates a wrong count; Windows
-// rejects the whole device with Code 10.
-enum { ITF_NUM_HID = 0, ITF_NUM_NET, ITF_NUM_NET_DATA, ITF_NUM_TOTAL };
-
-#define MAIN_CONFIG_TOTAL_LEN                                                  \
-  (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN + TUD_RNDIS_DESC_LEN)
-
-#define ALT_CONFIG_TOTAL_LEN                                                   \
-  (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN + TUD_CDC_ECM_DESC_LEN)
-
-//#define NCM_CONFIG_TOTAL_LEN                                                   \
-//  (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN + TUD_CDC_NCM_DESC_LEN)
+// Keyboard mode: a single HID interface
+enum { ITF_KBD_HID = 0, ITF_KBD_TOTAL };
 
 #define EPNUM_HID 0x81
-#define EPNUM_NET_NOTIF 0x82
-#define EPNUM_NET_OUT 0x03
-#define EPNUM_NET_IN 0x83
 
-static uint8_t const rndis_configuration[] = {
-    // Config number (index+1), interface count, string index, total length,
-    // attribute, power in mA
-    TUD_CONFIG_DESCRIPTOR(CONFIG_ID_RNDIS + 1, ITF_NUM_TOTAL, 0,
-                          MAIN_CONFIG_TOTAL_LEN, 0, 100),
+#define KEYBOARD_CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN)
+
+static uint8_t const keyboard_configuration[] = {
+    // Config number, interface count, string index, total length, attribute,
+    // power in mA
+    TUD_CONFIG_DESCRIPTOR(1, ITF_KBD_TOTAL, 0, KEYBOARD_CONFIG_TOTAL_LEN, 0,
+                          100),
 
     // Interface number, string index, protocol, report descriptor len, EP In
     // address, size & polling interval
-    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE,
+    TUD_HID_DESCRIPTOR(ITF_KBD_HID, 0, HID_ITF_PROTOCOL_NONE,
                        sizeof(desc_hid_report), EPNUM_HID,
                        CFG_TUD_HID_EP_BUFSIZE, 5),
+};
+
+// Config mode: RNDIS (config 1, Windows/Linux) or CDC-ECM (config 2,
+// macOS/Linux). Each creates two interfaces: control + data.
+enum { ITF_NET_CTRL = 0, ITF_NET_DATA, ITF_NET_TOTAL };
+
+#define EPNUM_NET_NOTIF 0x81
+#define EPNUM_NET_OUT 0x02
+#define EPNUM_NET_IN 0x82
+
+#define RNDIS_CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_RNDIS_DESC_LEN)
+#define ECM_CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_CDC_ECM_DESC_LEN)
+
+static uint8_t const rndis_configuration[] = {
+    TUD_CONFIG_DESCRIPTOR(CONFIG_ID_RNDIS + 1, ITF_NET_TOTAL, 0,
+                          RNDIS_CONFIG_TOTAL_LEN, 0, 100),
 
     // Interface number, string index, EP notification address and size, EP data
     // address (out, in) and size.
-    TUD_RNDIS_DESCRIPTOR(ITF_NUM_NET, STRID_INTERFACE, EPNUM_NET_NOTIF, 8,
+    TUD_RNDIS_DESCRIPTOR(ITF_NET_CTRL, STRID_INTERFACE, EPNUM_NET_NOTIF, 8,
                          EPNUM_NET_OUT, EPNUM_NET_IN,
                          CFG_TUD_NET_ENDPOINT_SIZE),
 };
 
 static uint8_t const ecm_configuration[] = {
-    // Config number (index+1), interface count, string index, total length,
-    // attribute, power in mA
-    TUD_CONFIG_DESCRIPTOR(CONFIG_ID_ECM + 1, ITF_NUM_TOTAL, 0,
-                          ALT_CONFIG_TOTAL_LEN, 0, 100),
-
-    // Interface number, string index, protocol, report descriptor len, EP In
-    // address, size & polling interval
-    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE,
-                       sizeof(desc_hid_report), EPNUM_HID,
-                       CFG_TUD_HID_EP_BUFSIZE, 5),
+    TUD_CONFIG_DESCRIPTOR(CONFIG_ID_ECM + 1, ITF_NET_TOTAL, 0,
+                          ECM_CONFIG_TOTAL_LEN, 0, 100),
 
     // Interface number, description string index, MAC address string index, EP
     // notification address and size, EP data address (out, in), and size, max
     // segment size.
-    TUD_CDC_ECM_DESCRIPTOR(ITF_NUM_NET, STRID_INTERFACE, STRID_MAC,
+    TUD_CDC_ECM_DESCRIPTOR(ITF_NET_CTRL, STRID_INTERFACE, STRID_MAC,
                            EPNUM_NET_NOTIF, 64, EPNUM_NET_OUT, EPNUM_NET_IN,
                            CFG_TUD_NET_ENDPOINT_SIZE, CFG_TUD_NET_MTU),
 };
 
-static uint8_t const *const configuration_arr[CONFIG_ID_COUNT] = {
+static uint8_t const *const network_configurations[CONFIG_ID_NET_COUNT] = {
     [CONFIG_ID_RNDIS] = rndis_configuration,
     [CONFIG_ID_ECM] = ecm_configuration};
 
@@ -166,7 +186,10 @@ static uint8_t const *const configuration_arr[CONFIG_ID_COUNT] = {
 // Application return pointer to descriptor
 // Descriptor contents must exist long enough for transfer to complete
 uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
-  return (index < CONFIG_ID_COUNT) ? configuration_arr[index] : NULL;
+  if (network_mode) {
+    return (index < CONFIG_ID_NET_COUNT) ? network_configurations[index] : NULL;
+  }
+  return (index == 0) ? keyboard_configuration : NULL;
 }
 
 //--------------------------------------------------------------------+

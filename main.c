@@ -10,6 +10,7 @@
 #include "macropad_config.h"
 #include "oled.h"
 #include "rndis.h"
+#include "usb_descriptors.h"
 
 #include "ws2812.h"
 
@@ -38,7 +39,8 @@ void keyboard_mode() {
 
 void config_mode() {
   rndis_init("macropad");
-  log_info("Starting at \n192.168.7.1");
+  log_info("Starting at");
+  log_info("192.168.7.1");
 
   while (true) {
     rndis_task();
@@ -76,17 +78,19 @@ void check_config_flash(void) {
 int main() {
   // Initialize Hardware
   oled_init();
-    
+
   logger_init();
   key_init();
   ws2812_init();
-  tusb_init();
 
   check_config_flash();
 
   log_info("Macropad starting");
 
   DeviceMode mode = get_device_mode();
+
+  usb_descriptors_set_network_mode(mode == MODE_CONFIG);
+  tusb_init();
 
   if (mode == MODE_CONFIG) {
     // blue led to indicate config mode

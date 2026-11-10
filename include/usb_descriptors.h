@@ -27,6 +27,12 @@
 #ifndef USB_DESCRIPTORS_H_
 #define USB_DESCRIPTORS_H_
 
+#include <stdbool.h>
+
+// Selects which USB device is presented: false = HID keyboard only,
+// true = RNDIS/CDC-ECM network only. Must be called before tusb_init().
+void usb_descriptors_set_network_mode(bool enabled);
+
 enum
 {
   REPORT_ID_KEYBOARD = 1,
