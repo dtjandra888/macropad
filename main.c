@@ -38,7 +38,7 @@ void keyboard_mode() {
 
 void config_mode() {
   rndis_init("macropad");
-  log_info("Starting at 192.168.7.1");
+  log_info("Starting at \n192.168.7.1");
 
   while (true) {
     rndis_task();

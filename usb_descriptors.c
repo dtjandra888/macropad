@@ -62,7 +62,7 @@ static tusb_desc_device_t const desc_device = {
 
     .idVendor = USB_VID,
     .idProduct = USB_PID,
-    .bcdDevice = 0x0100,
+    .bcdDevice = 0x0101,
 
     .iManufacturer = STRID_MANUFACTURER,
     .iProduct = STRID_PRODUCT,
@@ -100,7 +100,10 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance) {
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 
-enum { ITF_NUM_HID = 0, ITF_NUM_NET, ITF_NUM_TOTAL };
+// The RNDIS and CDC-ECM descriptor macros each create two interfaces (control
+// + data), so both must be counted. Linux tolerates a wrong count; Windows
+// rejects the whole device with Code 10.
+enum { ITF_NUM_HID = 0, ITF_NUM_NET, ITF_NUM_NET_DATA, ITF_NUM_TOTAL };
 
 #define MAIN_CONFIG_TOTAL_LEN                                                  \
   (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN + TUD_RNDIS_DESC_LEN)

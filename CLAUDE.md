@@ -37,7 +37,7 @@ At boot, the config button (`CONFIG_BTN_PIN`) is sampled once:
 - **Keyboard mode** (default): 1 ms loop of `key_scan()` → `process_key_events()` → `macro_task()`. Key index `r * KEY_COLS + c` maps directly to `config.macros[index]`; `macro.c` replays strokes as USB HID reports.
 - **Config mode** (button held, LED turns blue): starts a USB network interface (`lib/rndis`) with an lwIP HTTP server at 192.168.7.1. Never returns to keyboard mode without a reset.
 
-The USB device is a composite (HID + network). `usb_descriptors.c` exposes two configurations — RNDIS (Windows/Linux) and CDC-ECM (macOS/Linux) — plus Microsoft OS descriptors so Windows binds the RNDIS driver.
+The USB device is a composite (HID + network). `usb_descriptors.c` exposes two configurations — RNDIS (Windows/Linux) and CDC-ECM (macOS/Linux) — Windows 7+ binds RNDIS via the class codes in `TUD_RNDIS_DESCRIPTOR` (0xE0/0x01/0x03); there are no Microsoft OS descriptors. Linux picks the ECM configuration, Windows always uses RNDIS (config 1), so RNDIS bugs only show on Windows. The RNDIS/ECM macros each create two interfaces (control + data), so `ITF_NUM_TOTAL` must count both — Windows fails the whole device with Code 10 if `bNumInterfaces` is wrong.
 
 ### Config data flow
 - `include/config.h`: `Config` (fixed `macros[3]`, `MACRO_MAX_STROKES` = 5 in `macro.h`) wrapped in `ConfigStorage` with a magic + CRC32 header, stored in the **last flash sector** (`config.c`).

@@ -59,6 +59,10 @@ static struct netif netif_data;
 /* shared between tud_network_recv_cb() and service_traffic() */
 static struct pbuf *received_frame;
 
+/* false in keyboard mode: the USB network function is still exposed to the
+   host, but lwIP is never initialized, so network callbacks must do nothing */
+static bool net_started = false;
+
 /* this is used by this code, ./class/net/net_driver.c, and usb_descriptors.c */
 /* ideally speaking, this should be generated from the hardware's unique ID (if available) */
 /* it is suggested that the first byte is 0x02 to indicate a link-local address */
@@ -155,6 +159,10 @@ bool dns_query_proc(const char *name, ip4_addr_t *addr)
 
 bool tud_network_recv_cb(const uint8_t *src, uint16_t size)
 {
+  /* accept and drop frames when lwIP isn't running */
+  if (!net_started)
+    return true;
+
   /* this shouldn't happen, but if we get another packet before
   parsing the previous, we must signal our inability to accept it */
   if (received_frame)
@@ -204,6 +212,9 @@ static void service_traffic(void)
 
 void tud_network_init_cb(void)
 {
+  if (!net_started)
+    return;
+
   /* if the network is re-initializing and we have a leftover packet, we must do a cleanup */
   if (received_frame)
   {
@@ -233,6 +244,7 @@ int rndis_init(const char *hostname)
   mdns_resp_add_netif(&netif_data, hostname);
   httpd_init();
 
+  net_started = true;
   return 0;
 }
 
