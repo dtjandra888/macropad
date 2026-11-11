@@ -3,8 +3,10 @@
 #include "hid_json.h"
 #include "tusb.h"
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -99,24 +101,48 @@ bool string_to_hid_key(const char *name, uint8_t *key) {
   return false;
 }
 
+void json_append(char *buffer, size_t size, size_t *offset,
+                 const char *format, ...) {
+  if (size == 0) {
+    return;
+  }
+  if (*offset + 1 >= size) {
+    buffer[size - 1] = '\0'; // full: keep it terminated
+    return;
+  }
+
+  va_list args;
+  va_start(args, format);
+  int written = vsnprintf(buffer + *offset, size - *offset, format, args);
+  va_end(args);
+
+  if (written < 0) {
+    return;
+  }
+
+  // vsnprintf returns the untruncated length; only count what fit
+  size_t room = size - *offset - 1;
+  *offset += (size_t)written < room ? (size_t)written : room;
+}
+
 size_t modifiers_to_json(char *buffer, size_t size, uint8_t modifiers) {
   size_t offset = 0;
   bool first = true;
 
-  offset += snprintf(buffer + offset, size - offset, "[");
+  json_append(buffer, size, &offset, "[");
 
   for (size_t i = 0; i < sizeof(hid_modifiers) / sizeof(hid_modifiers[0]);
        i++) {
 
     if (modifiers & hid_modifiers[i].modifier) {
-      offset += snprintf(buffer + offset, size - offset, "%s\"%s\"",
-                         first ? "" : ",", hid_modifiers[i].name);
+      json_append(buffer, size, &offset, "%s\"%s\"", first ? "" : ",",
+                  hid_modifiers[i].name);
 
       first = false;
     }
   }
 
-  offset += snprintf(buffer + offset, size - offset, "]");
+  json_append(buffer, size, &offset, "]");
 
   return offset;
 }

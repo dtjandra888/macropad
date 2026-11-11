@@ -7,9 +7,7 @@
 
 #include <string.h>
 
-#define API_RESPONSE_SIZE 2048
-
-static char api_response[API_RESPONSE_SIZE];
+static char api_response[CONFIG_JSON_MAX_SIZE];
 
 err_t fs_open(struct fs_file *file, const char *name)
 {

@@ -16,7 +16,14 @@ mkdir -p build && cd build && cmake .. && make   # produces build/macro.uf2
 ./scripts/transfer.sh                            # from repo root: copies build/macro.uf2 to the RP2040 mounted at /dev/sda1 (BOOTSEL mode)
 ```
 
-There are no firmware tests. `compile_commands.json` is exported for clangd (`.clangd` adds the arm-none-eabi include path).
+`compile_commands.json` is exported for clangd (`.clangd` adds the arm-none-eabi include path).
+
+### Firmware unit tests (host gcc, no hardware)
+```bash
+cmake -S tests -B build-tests && cmake --build build-tests && ctest --test-dir build-tests --output-on-failure
+./build-tests/test_json_parser            # run one suite directly
+```
+`tests/` is a standalone CMake project (not part of the firmware build) using Unity (fetched by CMake) with ASan/UBSan. Each `tests/test_*.c` links one real firmware source plus hand-written fakes from `tests/fakes/`; `tests/stubs/` shadows the Pico SDK / TinyUSB / lwIP headers with just what our code uses. Hardware drivers, USB/network glue and the libraries themselves are not tested. Add a suite with `add_unit_test(<name> <sources...>)` in `tests/CMakeLists.txt`.
 
 ### Web UI (run in `web/`)
 ```bash
