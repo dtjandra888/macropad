@@ -36,6 +36,8 @@ The macropad appears to the host computer as a normal USB keyboard, so no custom
 
 Configuration is stored in the device's flash memory, allowing macros to persist across power cycles.
 
+See [docs/build.md](docs/build.md) for building and flashing the firmware and running the tests.
+
 ---
 
 # Web Configuration
