@@ -34,6 +34,7 @@ target_sources(${PROJECT_NAME}
         hid_report.c
         hid_json.c
         key.c
+        key_display.c
         logger.c
         macro.c
         oled.c

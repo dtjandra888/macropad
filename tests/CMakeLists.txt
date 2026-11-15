@@ -43,4 +43,5 @@ add_unit_test(test_json_parser ${ROOT}/lib/httpd/json_parser.c ${ROOT}/hid_json.
 add_unit_test(test_config_api ${ROOT}/lib/httpd/config_api.c ${ROOT}/lib/httpd/json_parser.c ${ROOT}/hid_json.c ${ROOT}/config.c fakes/fake_flash.c fakes/fake_lwip.c fakes/fake_log.c)
 add_unit_test(test_hid_report ${ROOT}/hid_report.c fakes/fake_tusb.c)
 add_unit_test(test_macro ${ROOT}/macro.c fakes/fake_time.c fakes/fake_hid_report.c fakes/fake_log.c)
+add_unit_test(test_key_display ${ROOT}/key_display.c fakes/fake_oled.c fakes/fake_key.c)
 add_unit_test(test_key ${ROOT}/key.c fakes/fake_gpio.c fakes/fake_time.c fakes/fake_hid_report.c fakes/fake_macro.c)

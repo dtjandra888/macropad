@@ -133,8 +133,10 @@ void oled_init() {
   oled_clear();
 }
 
+void oled_clear_buffer(void) { memset(framebuffer, 0, sizeof(framebuffer)); }
+
 void oled_clear(void) {
-  memset(framebuffer, 0, sizeof(framebuffer));
+  oled_clear_buffer();
 
   oled_update();
 }
@@ -180,5 +182,15 @@ void oled_draw_string(int x, int y, const char *str) {
     x += 6;
 
     str++;
+  }
+}
+
+void oled_draw_rect(int x, int y, int w, int h, bool filled) {
+  for (int dy = 0; dy < h; dy++) {
+    for (int dx = 0; dx < w; dx++) {
+      bool edge = dx == 0 || dy == 0 || dx == w - 1 || dy == h - 1;
+      if (filled || edge)
+        oled_draw_pixel(x + dx, y + dy, 1);
+    }
   }
 }

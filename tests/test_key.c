@@ -137,6 +137,23 @@ static void test_press_is_seen_after_debounce_time(void) {
   TEST_ASSERT_EQUAL_INT(1, fake_macro_start_count);
 }
 
+static void test_key_is_pressed_reports_debounced_state(void) {
+  TEST_ASSERT_FALSE(key_is_pressed(1));
+
+  set_switch(1, true);
+  scan();
+  TEST_ASSERT_FALSE(key_is_pressed(1)); // still bouncing
+
+  run_ms(KEY_DEBOUNCE_MS + 1);
+  TEST_ASSERT_TRUE(key_is_pressed(1));
+  TEST_ASSERT_FALSE(key_is_pressed(0));
+  TEST_ASSERT_FALSE(key_is_pressed(-1));
+  TEST_ASSERT_FALSE(key_is_pressed(KEY_ROWS * KEY_COLS));
+
+  release_and_settle(1);
+  TEST_ASSERT_FALSE(key_is_pressed(1));
+}
+
 static void test_bounce_restarts_debounce_timer(void) {
   set_switch(0, true);
   scan();
@@ -303,6 +320,7 @@ int main(void) {
   RUN_TEST(test_scan_leaves_rows_idle_high);
   RUN_TEST(test_nothing_happens_with_no_keys_pressed);
   RUN_TEST(test_press_is_seen_after_debounce_time);
+  RUN_TEST(test_key_is_pressed_reports_debounced_state);
   RUN_TEST(test_bounce_restarts_debounce_timer);
   RUN_TEST(test_short_glitch_is_ignored);
   RUN_TEST(test_release_is_debounced);

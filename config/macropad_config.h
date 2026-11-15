@@ -22,6 +22,10 @@
 #define OLED_PIN_CS 13
 #define OLED_PIN_RST 14
 
+// Keyboard mode shows key tiles on the OLED. Set to 1 to show log lines
+// instead (for debugging); config mode always shows logs.
+#define OLED_DEBUG_LOG 0
+
 // WS2812
 #define WS2812_PIN 16
 

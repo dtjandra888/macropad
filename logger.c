@@ -13,6 +13,17 @@
 #define LOG_LINE_LENGTH 21
 
 static char log_buffer[LOG_LINES][LOG_LINE_LENGTH];
+static bool display_enabled = true;
+
+static void draw_log(void) {
+  oled_clear_buffer();
+
+  for (int i = 0; i < LOG_LINES; i++) {
+    oled_draw_string(0, i * 8, log_buffer[i]);
+  }
+
+  oled_update();
+}
 
 static void add_log(const char *prefix, const char *format, va_list args) {
   char message[LOG_LINE_LENGTH + 1];
@@ -28,17 +39,18 @@ static void add_log(const char *prefix, const char *format, va_list args) {
   snprintf(log_buffer[LOG_LINES - 1], sizeof(log_buffer[LOG_LINES - 1]), "%s%s",
            prefix, message);
 
-  // Redraw OLED
-  oled_clear();
-
-  for (int i = 0; i < LOG_LINES; i++) {
-    oled_draw_string(0, i * 8, log_buffer[i]);
-  }
-
-  oled_update();
+  if (display_enabled)
+    draw_log();
 }
 
 void logger_init(void) { logger_clear(); }
+
+void logger_set_display(bool enabled) {
+  bool was_enabled = display_enabled;
+  display_enabled = enabled;
+  if (enabled && !was_enabled)
+    draw_log();
+}
 
 void logger_clear(void) {
   for (int i = 0; i < LOG_LINES; i++) {

@@ -83,6 +83,12 @@ void key_scan() {
   }
 }
 
+bool key_is_pressed(int index) {
+  if (index < 0 || index >= KEY_ROWS * KEY_COLS)
+    return false;
+  return key_state[index / KEY_COLS][index % KEY_COLS];
+}
+
 // Hold mode: mirror the physical key. Pressed on the down edge, released on
 // the up edge; the host handles any key repeat.
 static void handle_hold_key(int slot, const Macro *macro, bool pressed,

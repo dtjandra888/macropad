@@ -6,6 +6,7 @@
 #include "hid_report.h"
 #include "key.h"
 #include "key_config.h"
+#include "key_display.h"
 #include "logger.h"
 #include "macro.h"
 #include "macropad_config.h"
@@ -25,6 +26,11 @@ DeviceMode get_device_mode(void) {
 }
 
 void keyboard_mode() {
+#if !OLED_DEBUG_LOG
+  logger_set_display(false);
+  key_display_init();
+#endif
+
   absolute_time_t next_scan = get_absolute_time();
   while (true) {
     tud_task();
@@ -32,6 +38,9 @@ void keyboard_mode() {
     if (absolute_time_diff_us(get_absolute_time(), next_scan) <= 0) {
       next_scan = delayed_by_us(next_scan, 1000);
       key_scan();
+#if !OLED_DEBUG_LOG
+      key_display_task();
+#endif
       process_key_events();
       macro_task();
       hid_report_task();
